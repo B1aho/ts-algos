@@ -63,9 +63,8 @@ class LinkedList implements ILinkedList {
         let node: IListNode | null = this.#head;
         let resultStr = "";
         while (node) {
-            resultStr += `( ${node.value} )`;
+            resultStr += `( ${node.value} ) -> `;
             node = node.next;
-            if (node) resultStr += ' -> ';
         }
         return resultStr + 'null';
     };
