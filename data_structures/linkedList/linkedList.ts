@@ -1,5 +1,6 @@
 import { IListNode, ILinkedList } from "./types";
 
+// This class represent node of singly linked list
 class ListNode implements IListNode {
     next: IListNode | null = null;
     value: string = "";
@@ -9,6 +10,7 @@ class ListNode implements IListNode {
     }
 }
 
+// This class represent singly linked list
 export class LinkedList implements ILinkedList {
     #head: IListNode | null = null;
     #tail: IListNode | null = null;
@@ -18,6 +20,7 @@ export class LinkedList implements ILinkedList {
         return this.#length;
     };
 
+    // Add to the end of the list
     append(val: string) {
         const node = new ListNode(val);
         if (!this.#head || !this.#tail) {
@@ -30,6 +33,7 @@ export class LinkedList implements ILinkedList {
         this.#length++;
     };
 
+    // Add to the beginning of the list
     prepend(val: string) {
         const node = new ListNode(val);
         if (this.#length === 0) {
@@ -42,6 +46,7 @@ export class LinkedList implements ILinkedList {
         this.#length++;
     };
 
+    // Represent list as a string: ( val ) -> ( val ) -> ( val ) -> null 
     toString() {
         if (this.#head === null) return "";
         let node: IListNode | null = this.#head;
@@ -53,6 +58,7 @@ export class LinkedList implements ILinkedList {
         return resultStr + 'null';
     };
 
+    // Get the node by index
     at(idx: number) {
         if (this.#head === null || idx < 0)
             return null;
@@ -65,15 +71,17 @@ export class LinkedList implements ILinkedList {
         return node;
     };
 
+    // Remove the node from the end of the list
     pop() {
         if (this.#length <= 0 || !this.#head) return null;
         let data: string;
-        if (this.#tail && this.#tail === this.#head) {
+        if (this.#tail && this.#length === 1) {
             data = this.#tail.value;
             this.#head = null;
             this.#tail = null;
         } else {
             let node = this.#head;
+            // Find the second-to-last node 
             while (node.next && node.next !== this.#tail)
                 node = node.next;
             data = (this.#tail) ? this.#tail.value : "";
@@ -84,6 +92,7 @@ export class LinkedList implements ILinkedList {
         return data;
     }
 
+    // Check if list contain value
     contains(val: string) {
         if (this.size() === 0)
             return false;
@@ -96,6 +105,7 @@ export class LinkedList implements ILinkedList {
         return false;
     }
 
+    // Get the index of the node with a value equivalent to the given one
     find(val: string) {
         if (this.size() === 0)
             return null;
@@ -110,6 +120,7 @@ export class LinkedList implements ILinkedList {
         return null;
     }
 
+    // Insert the node in specific index position 
     insertAt(value: string, idx: number) {
         if (idx < 0 || idx > this.size() || !this.#head) return false;
         if (idx === 0) {
@@ -120,6 +131,9 @@ export class LinkedList implements ILinkedList {
             this.append(value);
             return true;
         }
+        // To insert a node at a specific index:
+        // Connect the inserted node to its following node
+        // and connect the preceding node to the inserted node
         const newNode = new ListNode(value);
         let beforeNode = this.at(idx - 1);
 
@@ -131,10 +145,14 @@ export class LinkedList implements ILinkedList {
         return true;
     }
 
+    // Remove the node from specific index position 
     removeAt(idx: number) {
+        // Non-valid index
         if (this.#length === 0 || idx < 0 || idx >= this.#length) return null;
+        // Remove tail node
         if (idx + 1 === this.#length) return this.pop();
         let value = "";
+        // Remove head node
         if (idx === 0 && this.#head) {
             const newHead = this.#head.next;
             this.#head.next = null;
@@ -143,6 +161,9 @@ export class LinkedList implements ILinkedList {
             this.#length--;
             return value;
         }
+        // To delete a node at a specific index:
+        // connect the node before it to the node following it, 
+        // and then set its 'next' field to null
         let beforeNode = this.at(idx - 1);
         if (!beforeNode || !beforeNode.next) return null;
         let targetNode = beforeNode.next;
@@ -154,6 +175,9 @@ export class LinkedList implements ILinkedList {
         return value;
     };
 
+    // Define list iterator. Use cases: 
+    // allow iteration through for..of 
+    // and support standart method for ierable collections (map, filter, ..)
     *[Symbol.iterator](): IterableIterator<IListNode> {
         let currentNode = this.#head;
         while (currentNode) {
