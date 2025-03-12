@@ -161,7 +161,28 @@ class LinkedList implements ILinkedList {
     }
 
     removeAt(idx: number) {
-        return null;
+        if (this.size() === 0 || idx < 0 || idx >= this.size())
+            return null;
+        if (idx + 1 === this.size())
+            return this.pop();
+        let value = "";
+        if (idx === 0 && this.#head) {
+            const newHead = this.#head.next;
+            this.#head.next = null;
+            value = this.#head.value;
+            this.#head = newHead;
+            return value;
+        }
+        let beforePtr = this.#head as IListNode;
+        let targetPtr: IListNode;
+        targetPtr = this.at(idx) as IListNode;
+        while (beforePtr.next !== targetPtr) {
+            beforePtr = beforePtr.next as IListNode;
+        }
+        beforePtr.next = targetPtr.next;
+        targetPtr.next = null;
+        value = targetPtr.value;
+        return value;
     };
 };
 
@@ -186,4 +207,6 @@ console.log(list.size());
 console.log('Contains parrot:', list.contains('parrot'));
 console.log('Dog index:', list.find("dog"));
 list.insertAt('bull', 2);
+console.log(list.toString());
+list.removeAt(1);
 console.log(list.toString());
