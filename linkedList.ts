@@ -80,11 +80,35 @@ class LinkedList implements ILinkedList {
         return resultStr;
     };
 
-    at: (idx: number) => IListNode | null;
-    pop: () => string | null;
-    contains: (val: string) => boolean;
-    find: (val: string) => number | null;
-    insertAt: (value: string, idx: number) => boolean;
-    removeAt: (idx: number) => string | null;
+    at(idx: number) {
+        const node = new ListNode("");
+        return node;
+    };
+    pop() {
+        return "";
+    }
+    contains(val: string) {
+        return true;
+    }
+    find(val: string) {
+        return null;
+    }
+    insertAt(value: string, idx: number) {
+        return true;
+    }
+    removeAt(idx: number) {
+        return null;
+    };
 };
 
+// example uses class syntax - adjust as necessary
+const list = new LinkedList();
+
+list.append("dog");
+list.append("cat");
+list.append("parrot");
+list.append("hamster");
+list.append("snake");
+list.append("turtle");
+list.prepend("monkey");
+console.log(list.toString());
