@@ -153,4 +153,12 @@ export class LinkedList implements ILinkedList {
 
         return value;
     };
+
+    *[Symbol.iterator](): IterableIterator<IListNode> {
+        let currentNode = this.#head;
+        while (currentNode) {
+            yield currentNode;
+            currentNode = currentNode.next;
+        }
+    }
 };

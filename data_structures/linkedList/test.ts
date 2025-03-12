@@ -24,3 +24,7 @@ list.insertAt('bull', 2);
 console.log(list.toString());
 list.removeAt(1);
 console.log(list.toString());
+
+for (let node of list) {
+    console.log(node.value.toUpperCase());
+}
