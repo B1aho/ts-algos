@@ -13,8 +13,8 @@ class ListNode implements IListNode {
 }
 
 interface ILinkedList {
-    append: (val: string) => boolean;
-    prepend: (val: string) => boolean;
+    append: (val: string) => void;
+    prepend: (val: string) => void;
     size: () => number;
     at: (idx: number) => IListNode | null;
     pop: () => string | null;
@@ -46,7 +46,45 @@ class LinkedList implements ILinkedList {
     }
 
     append(val: string) {
-
-        return true;
+        const node = new ListNode(val);
+        if (this.#head === null || this.#tail === null) {
+            this.#head = node;
+            this.#tail = node;
+        } else {
+            this.#tail.next = node;
+            this.#tail = node;
+        }
     };
-}
+
+    prepend(val: string) {
+        const node = new ListNode(val);
+        if (this.#head === null) {
+            this.#head = node;
+            this.#tail = node;
+        } else {
+            node.next = this.#head;
+            this.#head = node;
+        }
+    };
+
+    toString() {
+        if (this.#head === null)
+            return "";
+        let ptr: IListNode | null = this.#head;
+        let resultStr = "";
+        while (ptr) {
+            resultStr += '( ' + ptr.value + ' )';
+            ptr = ptr.next;
+            if (ptr) resultStr += ' -> ';
+        }
+        return resultStr;
+    };
+
+    at: (idx: number) => IListNode | null;
+    pop: () => string | null;
+    contains: (val: string) => boolean;
+    find: (val: string) => number | null;
+    insertAt: (value: string, idx: number) => boolean;
+    removeAt: (idx: number) => string | null;
+};
+
