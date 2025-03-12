@@ -28,97 +28,87 @@ interface ILinkedList {
 class LinkedList implements ILinkedList {
     #head: IListNode | null = null;
     #tail: IListNode | null = null;
-
+    #length: number = 0;
 
     size() {
-        if (this.#head === null || this.#tail === null)
-            return 0;
-        let total = 1;
-        let ptr: IListNode | null = this.#head
-        while (ptr && ptr !== this.#tail) {
-            ptr = ptr.next;
-            total++
-        }
-        return total;
-    }
+        return this.#length;
+    };
 
     append(val: string) {
         const node = new ListNode(val);
-        if (this.#head === null || this.#tail === null) {
+        if (!this.#head || !this.#tail) {
             this.#head = node;
             this.#tail = node;
         } else {
             this.#tail.next = node;
             this.#tail = node;
         }
+        this.#length++;
     };
 
     prepend(val: string) {
         const node = new ListNode(val);
-        if (this.size() === 0) {
+        if (this.#length === 0) {
             this.#head = node;
             this.#tail = node;
         } else {
             node.next = this.#head;
             this.#head = node;
         }
+        this.#length++;
     };
 
     toString() {
-        if (this.#head === null)
-            return "";
-        let ptr: IListNode | null = this.#head;
+        if (this.#head === null) return "";
+        let node: IListNode | null = this.#head;
         let resultStr = "";
-        while (ptr) {
-            resultStr += '( ' + ptr.value + ' )';
-            ptr = ptr.next;
-            if (ptr) resultStr += ' -> ';
+        while (node) {
+            resultStr += `( ${node.value} )`;
+            node = node.next;
+            if (node) resultStr += ' -> ';
         }
-        return resultStr;
+        return resultStr + 'null';
     };
 
     at(idx: number) {
-        if (this.#head === null || idx <= 0)
+        if (this.#head === null || idx < 0)
             return null;
-        const node = new ListNode("");
         let curr = 0;
-        let ptr: IListNode | null = this.#head;
-        while (ptr && curr !== idx) {
-            ptr = ptr.next;
+        let node: IListNode | null = this.#head;
+        while (node && curr < idx) {
+            node = node.next;
             curr++;
         }
-        return ptr;
+        return node;
     };
 
     pop() {
-        if (this.size() <= 0) {
-            return null;
-        }
-        let data = null;
+        if (this.#length <= 0 || !this.#head) return null;
+        let data: string;
         if (this.#tail && this.#tail === this.#head) {
             data = this.#tail.value;
             this.#head = null;
             this.#tail = null;
-            return data;
         } else {
-            let ptr = this.#head as IListNode;
-            while (ptr.next && ptr.next !== this.#tail)
-                ptr = ptr.next;
-            data = (this.#tail) ? this.#tail.value : null;
-            this.#tail = ptr;
-            ptr.next = null;
+            let node = this.#head;
+            while (node.next && node.next !== this.#tail)
+                node = node.next;
+            data = (this.#tail) ? this.#tail.value : "";
+            this.#tail = node;
+            this.#tail.next = null;
         }
+        this.#length--;
         return data;
     }
 
     contains(val: string) {
         if (this.size() === 0)
             return false;
-        let ptr = this.#head
-        while (ptr) {
-            if (ptr.value === val)
+        let node = this.#head
+        while (node) {
+            if (node.value === val)
                 return true;
-            ptr = ptr.next;
+            node = node.next;
         }
         return false;
     }
@@ -126,20 +116,19 @@ class LinkedList implements ILinkedList {
     find(val: string) {
         if (this.size() === 0)
             return null;
-        let ptr = this.#head;
+        let node = this.#head;
         let idx = 0;
-        while (ptr) {
-            if (ptr.value === val)
+        while (node) {
+            if (node.value === val)
                 return idx;
-            ptr = ptr.next;
+            node = node.next;
             idx++;
         }
         return null;
     }
 
     insertAt(value: string, idx: number) {
-        if (idx < 0 || idx > this.size())
-            return false;
+        if (idx < 0 || idx > this.size() || !this.#head) return false;
         if (idx === 0) {
             this.prepend(value);
             return true
@@ -148,40 +137,37 @@ class LinkedList implements ILinkedList {
             this.append(value);
             return true;
         }
-        let beforePtr: IListNode = this.#head as IListNode;
-        let targetPtr: IListNode;
-        targetPtr = this.at(idx) as IListNode;
-        while (beforePtr.next !== targetPtr) {
-            beforePtr = beforePtr.next as IListNode;
-        }
         const newNode = new ListNode(value);
-        beforePtr.next = newNode;
-        newNode.next = targetPtr;
+        let beforeNode = this.at(idx - 1);
+
+        if (!beforeNode) return false;
+
+        newNode.next = beforeNode.next;
+        beforeNode.next = newNode;
+        this.#length++;
         return true;
     }
 
     removeAt(idx: number) {
-        if (this.size() === 0 || idx < 0 || idx >= this.size())
-            return null;
-        if (idx + 1 === this.size())
-            return this.pop();
+        if (this.#length === 0 || idx < 0 || idx >= this.#length) return null;
+        if (idx + 1 === this.#length) return this.pop();
         let value = "";
         if (idx === 0 && this.#head) {
             const newHead = this.#head.next;
             this.#head.next = null;
             value = this.#head.value;
             this.#head = newHead;
+            this.#length--;
             return value;
         }
-        let beforePtr = this.#head as IListNode;
-        let targetPtr: IListNode;
-        targetPtr = this.at(idx) as IListNode;
-        while (beforePtr.next !== targetPtr) {
-            beforePtr = beforePtr.next as IListNode;
-        }
-        beforePtr.next = targetPtr.next;
-        targetPtr.next = null;
-        value = targetPtr.value;
+        let beforeNode = this.at(idx - 1);
+        if (!beforeNode || !beforeNode.next) return null;
+        let targetNode = beforeNode.next;
+        beforeNode.next = targetNode.next;
+        targetNode.next = null;
+        value = targetNode.value;
+        this.#length--;
+
         return value;
     };
 };
