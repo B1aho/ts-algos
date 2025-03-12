@@ -138,6 +138,25 @@ class LinkedList implements ILinkedList {
     }
 
     insertAt(value: string, idx: number) {
+        if (idx < 0 || idx > this.size())
+            return false;
+        if (idx === 0) {
+            this.prepend(value);
+            return true
+        }
+        if (idx === this.size()) {
+            this.append(value);
+            return true;
+        }
+        let beforePtr: IListNode = this.#head as IListNode;
+        let targetPtr: IListNode;
+        targetPtr = this.at(idx) as IListNode;
+        while (beforePtr.next !== targetPtr) {
+            beforePtr = beforePtr.next as IListNode;
+        }
+        const newNode = new ListNode(value);
+        beforePtr.next = newNode;
+        newNode.next = targetPtr;
         return true;
     }
 
@@ -166,3 +185,5 @@ console.log(list.toString());
 console.log(list.size());
 console.log('Contains parrot:', list.contains('parrot'));
 console.log('Dog index:', list.find("dog"));
+list.insertAt('bull', 2);
+console.log(list.toString());
