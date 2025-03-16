@@ -7,6 +7,8 @@
 import { IHashMapNode, IHashMap, Key, HashNodeNullable } from "./types";
 import { fnv1aHash } from "./hashCode";
 
+const LOAD_FACTOR = 0.8;
+const CAPACITY = 32;
 // Добавить комментарий, что ссылки prevOrder nextOrder логически образуют двусвязный список - для соблюдения порядка
 // А nextInBucket образует односвязный список конкретной корзины
 class HashMapNode<K extends Key, V> implements IHashMapNode<K, V> {
@@ -39,7 +41,7 @@ class HashMap<K extends Key, V> implements IHashMap<K, V> {
     // Double linked list (implement order)
     head: HashNodeNullable<K, V> = null;
     tail: HashNodeNullable<K, V> = null;
-    constructor(capacity = 32, loadFactor = 0.8) {
+    constructor(capacity = CAPACITY, loadFactor = LOAD_FACTOR) {
         // Calculate the table's limit – the maximum number of elements effective to keep, presumably without collisions
         this.capacity = capacity;
         this.loadFactor = loadFactor;
