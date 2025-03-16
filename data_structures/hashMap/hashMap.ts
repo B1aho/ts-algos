@@ -6,13 +6,13 @@
 // угодно.
 import { IHashMapNode, IHashMap, Key } from "./types";
 
-class HashMapNode implements IHashMapNode {
-    prevOrder: IHashMapNode | null;
-    nextOrder: IHashMapNode | null;
-    nextInBucket: IHashMapNode | null;
-    key: Key;
-    value: any;
-    constructor(key: Key, value: any, prevOrder = null, nextOrder = null, nextInBucket = null) {
+class HashMapNode<K extends Key, V> implements IHashMapNode<K, V> {
+    prevOrder: IHashMapNode<K, V> | null;
+    nextOrder: IHashMapNode<K, V> | null;
+    nextInBucket: IHashMapNode<K, V> | null;
+    key: K;
+    value: V;
+    constructor(key: K, value: V, prevOrder = null, nextOrder = null, nextInBucket = null) {
         this.key = key;
         this.value = value;
         this.prevOrder = prevOrder;

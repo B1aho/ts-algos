@@ -1,11 +1,15 @@
 export type Key = string | number | boolean;
 
-export interface IHashMapNode {
-    key: Key;
-    value: any;
-    prevOrder: IHashMapNode | null;
-    nextOrder: IHashMapNode | null;
-    nextInBucket: IHashMapNode | null;
+export interface IHashMapNode<K extends Key, V> {
+    key: K;
+    value: V;
+    prevOrder: IHashMapNode<K, V> | null;
+    nextOrder: IHashMapNode<K, V> | null;
+    nextInBucket: IHashMapNode<K, V> | null;
 }
 
-export type IHashMap = IHashMapNode[];
+export interface IHashMap<K extends Key, V> {
+    hashMap: IHashMapNode<K, V>[];
+    set: (key: K, value: V) => boolean;
+    get: (key: K) => V;
+}
