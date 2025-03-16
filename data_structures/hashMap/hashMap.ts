@@ -32,7 +32,7 @@ class HashMapNode<K extends Key, V> implements IHashMapNode<K, V> {
     };
 }
 
-class HashMap<K extends Key, V> implements IHashMap<K, V> {
+export class HashMap<K extends Key, V> implements IHashMap<K, V> {
     capacity: number;
     loadFactor: number;
     limit: number = 0;
@@ -77,16 +77,8 @@ class HashMap<K extends Key, V> implements IHashMap<K, V> {
 
     // Set new key: value entry into the table
     set(key: K, value: V) {
-        // If the new element overflows the table, we expand it and rehash
-        if (this.#length + 1 >= this.limit) {
-            this.capacity *= 2;
-            this.limit = Math.floor(this.capacity * this.loadFactor);
-            const newMap = new Array(this.capacity).fill(null);
-            this.#rehash(newMap);
-        }
-
         const idx = this.hash(key);
-        if (idx < 0 || idx >= this.#length) {
+        if (idx < 0 || idx > this.capacity) {
             throw new Error("Wrong hash: Trying to access index out of bounds");
         }
 
@@ -118,6 +110,13 @@ class HashMap<K extends Key, V> implements IHashMap<K, V> {
 
                 this.#length++;
             }
+        }
+        // If table full loaded, we expand it and rehash
+        if (this.#length > this.limit) {
+            this.capacity *= 2;
+            this.limit = Math.floor(this.capacity * this.loadFactor);
+            const newMap = new Array(this.capacity).fill(null);
+            this.#rehash(newMap);
         }
         return this.Map;
     };
