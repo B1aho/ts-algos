@@ -179,6 +179,37 @@ class HashMap<K extends Key, V> implements IHashMap<K, V> {
         return false;
     };
 
+    // Можно реализовать как генератор для ленивой итерации
+    keys() {
+        const keys: K[] = [];
+        for (const node of this) {
+            keys.push(node.key);
+        }
+        return keys;
+    };
+
+    // Можно реализовать как генератор для ленивой итерации
+    values() {
+        const values: V[] = [];
+        for (const node of this) {
+            values.push(node.value);
+        }
+        return values;
+    };
+
+    // Можно реализовать как генератор для ленивой итерации
+    entries() {
+        const entries: [K, V][] = [];
+        for (const node of this) {
+            entries.push([node.key, node.value]);
+        }
+        return entries;
+    };
+
+    has(key: K) {
+        return this.get(key) !== null;
+    }
+
     length() {
         return this.#length;
     };
