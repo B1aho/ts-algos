@@ -36,7 +36,7 @@ export class HashMap<K extends Key, V> implements IHashMap<K, V> {
     capacity: number;
     loadFactor: number;
     limit: number = 0;
-    Map: HashNodeNullable<K, V>[];
+    #Map: HashNodeNullable<K, V>[];
     #length = 0;
     // Double linked list (implement order)
     head: HashNodeNullable<K, V> = null;
@@ -47,7 +47,7 @@ export class HashMap<K extends Key, V> implements IHashMap<K, V> {
         this.loadFactor = loadFactor;
         this.limit = Math.floor(this.capacity * this.loadFactor);
         // Init Map
-        this.Map = new Array(this.capacity).fill(null);
+        this.#Map = new Array(this.capacity).fill(null);
     };
 
     // Hash-function
@@ -57,7 +57,7 @@ export class HashMap<K extends Key, V> implements IHashMap<K, V> {
 
     #rehash(newMap: HashNodeNullable<K, V>[]) {
         // Проходим по всем узлам старой таблицы
-        for (let node of this.Map) {
+        for (let node of this.#Map) {
             while (node) {
                 // Вычисляем новый индекс с помощью хеш-функции
                 const newIdx = this.hash(node.key);
@@ -71,8 +71,8 @@ export class HashMap<K extends Key, V> implements IHashMap<K, V> {
                 node = nextNode;
             }
         }
-        this.Map.fill(null);
-        this.Map = newMap;
+        this.#Map.fill(null);
+        this.#Map = newMap;
     }
 
     // Set new key: value entry into the table
@@ -82,12 +82,12 @@ export class HashMap<K extends Key, V> implements IHashMap<K, V> {
             throw new Error("Wrong hash: Trying to access index out of bounds");
         }
 
-        let target: HashNodeNullable<K, V> = this.Map[idx];
+        let target: HashNodeNullable<K, V> = this.#Map[idx];
         // Если нет коллизии
         if (!target) {
             // Добавляем новый узел
             const newNode = new HashMapNode(key, value, this.tail)
-            this.Map[idx] = newNode;
+            this.#Map[idx] = newNode;
             // обновляем двусвязный список
             if (!this.head) this.head = newNode;
             if (this.tail) this.tail.nextOrder = newNode;
@@ -118,13 +118,13 @@ export class HashMap<K extends Key, V> implements IHashMap<K, V> {
             const newMap = new Array(this.capacity).fill(null);
             this.#rehash(newMap);
         }
-        return this.Map;
+        return this.#Map;
     };
 
     // Get value by key
     get(key: K) {
         const idx = this.hash(key);
-        let node = this.Map[idx];
+        let node = this.#Map[idx];
         while (node) {
             if (node.key === key)
                 return node.value;
@@ -141,7 +141,7 @@ export class HashMap<K extends Key, V> implements IHashMap<K, V> {
     ) {
         // Если удаляемый узел - это голова односвязного списка корзины
         if (typeof prevNode === "number") {
-            this.Map[prevNode] = removeNode.nextInBucket;
+            this.#Map[prevNode] = removeNode.nextInBucket;
         } else {
             prevNode.nextInBucket = removeNode.nextInBucket;
         }
@@ -163,7 +163,7 @@ export class HashMap<K extends Key, V> implements IHashMap<K, V> {
 
     remove(key: K) {
         const idx = this.hash(key);
-        let node = this.Map[idx];
+        let node = this.#Map[idx];
         if (!node) return false;
         // Если удаляемый узел в начале списка корзины
         if (node.key === key) {
@@ -217,7 +217,7 @@ export class HashMap<K extends Key, V> implements IHashMap<K, V> {
 
     clear(isDeep = false) {
         if (isDeep) {
-            this.Map.forEach((node, idx) => {
+            this.#Map.forEach((node, idx) => {
                 let currentNode = node;
                 while (currentNode) {
                     const nextNode = currentNode.nextInBucket;
@@ -226,7 +226,7 @@ export class HashMap<K extends Key, V> implements IHashMap<K, V> {
                 }
             });
         }
-        this.Map.fill(null);
+        this.#Map.fill(null);
         this.tail = null;
         this.head = null;
         this.#length = 0;

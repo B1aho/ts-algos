@@ -13,7 +13,6 @@ export type HashNodeNullable<K extends Key, V> = IHashMapNode<K, V> | null;
 export interface IHashMap<K extends Key, V> {
     capacity: number;
     loadFactor: number;
-    Map: HashNodeNullable<K, V>[];
     hash: (key: K) => number;
     set: (key: K, value: V) => HashNodeNullable<K, V>[];
     get: (key: K) => V | null;
