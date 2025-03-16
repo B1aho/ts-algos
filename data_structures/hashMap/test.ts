@@ -33,8 +33,4 @@ console.log(test.keys());
 console.log(test.values());
 console.log(test.clear());
 console.log(test.entries());
-/**
- * Test the other methods of your hash map, such as get(key), has(key), remove(key), length(), 
- * clear(), keys(), values(), and entries(), to check if they are still working as expected after 
- * expanding your hash map.
- */
+

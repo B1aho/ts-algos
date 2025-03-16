@@ -1,16 +1,17 @@
-// Настоящие тесты добавить!
+// Implementing an analog of Map in JS. HashMap is a hash table based on an array of linked lists. 
+// The key can be a string, number, or boolean. 
+// Additionally, nodes have `prevOrder` and `nextOrder` properties, which logically form a doubly linked list. 
+// Thanks to this design, when iterating over the hashMap (using the implemented iterator), 
+// the iteration will follow the insertion order (traversing the doubly linked list).
 
-// Реализую аналог Map в JS. хэш таблица на основе массива связных списков. Также существует отдельно
-// Двусвязный список благодаря которому при переборе значение в hashMap (встрою итератор), они будут
-// перебираться в порядке добавления, перебираться будет этот двусвязный список. А ключами может быть все, что
-// угодно.
 import { IHashMapNode, IHashMap, Key, HashNodeNullable } from "./types";
 import { fnv1aHash } from "./hashCode";
 
 const LOAD_FACTOR = 0.8;
 const CAPACITY = 32;
-// Добавить комментарий, что ссылки prevOrder nextOrder логически образуют двусвязный список - для соблюдения порядка
-// А nextInBucket образует односвязный список конкретной корзины
+
+// prevOrder, nextOrder - doubly lined list
+// nextInBucket - single linked list in a bucket
 class HashMapNode<K extends Key, V> implements IHashMapNode<K, V> {
     prevOrder: HashNodeNullable<K, V>;
     nextOrder: HashNodeNullable<K, V>;
@@ -38,7 +39,7 @@ export class HashMap<K extends Key, V> implements IHashMap<K, V> {
     limit: number = 0;
     #Map: HashNodeNullable<K, V>[];
     #length = 0;
-    // Double linked list (implement order)
+    // Pointer to the head and tail of doubly linked list
     head: HashNodeNullable<K, V> = null;
     tail: HashNodeNullable<K, V> = null;
     constructor(capacity = CAPACITY, loadFactor = LOAD_FACTOR) {
@@ -56,15 +57,14 @@ export class HashMap<K extends Key, V> implements IHashMap<K, V> {
     };
 
     #rehash(newMap: HashNodeNullable<K, V>[]) {
-        // Проходим по всем узлам старой таблицы
+        // Iterate over all nodes in the old table
         for (let node of this.#Map) {
             while (node) {
-                // Вычисляем новый индекс с помощью хеш-функции
                 const newIdx = this.hash(node.key);
-                // Сохраняем ссылку на следующий узел в старой цепочке, чтобы не потерять её
+                // Save a reference to the next node in the old chain to avoid losing it
                 const nextNode = node.nextInBucket;
 
-                // Вствляем узел в голову списка корзины в новой таблице
+                // Insert the node at the head of the bucket list in the new table
                 node.nextInBucket = newMap[newIdx];
                 newMap[newIdx] = node;
 
@@ -83,19 +83,19 @@ export class HashMap<K extends Key, V> implements IHashMap<K, V> {
         }
 
         let target: HashNodeNullable<K, V> = this.#Map[idx];
-        // Если нет коллизии
+        // If there is no items in the bucket
         if (!target) {
-            // Добавляем новый узел
+            // Add new node to the bucket
             const newNode = new HashMapNode(key, value, this.tail)
             this.#Map[idx] = newNode;
-            // обновляем двусвязный список
+            // Update the doubly linked list
             if (!this.head) this.head = newNode;
             if (this.tail) this.tail.nextOrder = newNode;
             this.tail = newNode;
 
             this.#length++;
         } else {
-            // Поиск в связном списке корзины
+            // Search in the singly linked list of the bucket
             while (target.key !== key && target.nextInBucket) {
                 target = target.nextInBucket;
             }
@@ -104,7 +104,7 @@ export class HashMap<K extends Key, V> implements IHashMap<K, V> {
                 const newNode = new HashMapNode(key, value, this.tail);
                 target.nextInBucket = newNode;
 
-                // Обновляем двусвязный список
+                // Update the doubly linked list
                 if (this.tail) this.tail.nextOrder = newNode;
                 this.tail = newNode;
 
@@ -133,26 +133,27 @@ export class HashMap<K extends Key, V> implements IHashMap<K, V> {
         return null;
     };
 
-    // Удаляет узел соблюдая связи в односвязном списке корзины и двусвязном списке порядка добавления
-    // prevNode - предыдущий список в односвязном списке корзины
+    // Removes a node while maintaining connections in the singly linked bucket list 
+    // and the doubly linked insertion order list
+    // prevNode - the previous node in the singly linked bucket list
     #removeHelper(
         prevNode: number | IHashMapNode<K, V>,
         removeNode: IHashMapNode<K, V>,
     ) {
-        // Если удаляемый узел - это голова односвязного списка корзины
+        // If the node to be removed is the head of the singly linked bucket list
         if (typeof prevNode === "number") {
             this.#Map[prevNode] = removeNode.nextInBucket;
         } else {
             prevNode.nextInBucket = removeNode.nextInBucket;
         }
 
-        // Сохраняем порядок двусвязного списка
+        // Maintain the order of the doubly linked list
         if (this.tail === removeNode) this.tail = removeNode.prevOrder;
         if (this.head === removeNode) this.head = removeNode.nextOrder;
         if (removeNode.nextOrder && removeNode.prevOrder) {
             removeNode.prevOrder.nextOrder = removeNode.nextOrder;
         }
-        // Очищаем узел, чтобы избежать утечек памяти 
+        // Clear the node to prevent memory leaks
         removeNode.prevOrder = null;
         removeNode.nextOrder = null;
         removeNode.nextInBucket = null;
@@ -161,15 +162,16 @@ export class HashMap<K extends Key, V> implements IHashMap<K, V> {
         return true;
     };
 
+    // Remove entry by key
     remove(key: K) {
         const idx = this.hash(key);
         let node = this.#Map[idx];
         if (!node) return false;
-        // Если удаляемый узел в начале списка корзины
+        // If the node to be removed is at the beginning of the bucket list
         if (node.key === key) {
             return this.#removeHelper(idx, node);
         } else {
-            // Пробегаем по связному списку в корзине, чтобы найти предыдущий узел удаляемого узла
+            // Go through the linked list in the bucket to find the previous node of the one being removed
             while (node.nextInBucket) {
                 if (node.nextInBucket.key === key) {
                     let removeNode = node.nextInBucket;
@@ -180,7 +182,7 @@ export class HashMap<K extends Key, V> implements IHashMap<K, V> {
         return false;
     };
 
-    // Можно реализовать как генератор для ленивой итерации
+    // The keys, values, and entries methods can be implemented as generators for lazy iteration
     keys() {
         const keys: K[] = [];
         for (const node of this) {
@@ -189,7 +191,6 @@ export class HashMap<K extends Key, V> implements IHashMap<K, V> {
         return keys;
     };
 
-    // Можно реализовать как генератор для ленивой итерации
     values() {
         const values: V[] = [];
         for (const node of this) {
@@ -198,7 +199,6 @@ export class HashMap<K extends Key, V> implements IHashMap<K, V> {
         return values;
     };
 
-    // Можно реализовать как генератор для ленивой итерации
     entries() {
         const entries: [K, V][] = [];
         for (const node of this) {
@@ -215,7 +215,9 @@ export class HashMap<K extends Key, V> implements IHashMap<K, V> {
         return this.#length;
     };
 
+    // Cleare the hash table
     clear(isDeep = false) {
+        // If table contain complex objects, then clear them too
         if (isDeep) {
             this.#Map.forEach((node, idx) => {
                 let currentNode = node;
@@ -232,6 +234,7 @@ export class HashMap<K extends Key, V> implements IHashMap<K, V> {
         this.#length = 0;
     };
 
+    // Generator that produce iterator - make hash table iterable 
     *[Symbol.iterator]() {
         let node = this.head;
         while (node) {
