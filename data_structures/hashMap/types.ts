@@ -20,7 +20,7 @@ export interface IHashMap<K extends Key, V> {
     has: (key: K) => boolean;
     remove: (key: K) => boolean;
     length: () => number;
-    clear: () => void;
+    clear: (isDeep?: boolean) => void;
     keys: () => K[];
     values: () => V[];
     entries: () => [K, V][];

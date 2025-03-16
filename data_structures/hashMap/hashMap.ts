@@ -132,11 +132,32 @@ class HashMap<K extends Key, V> implements IHashMap<K, V> {
         return null;
     };
 
+    length() {
+        return this.#length;
+    };
+
+    clear(isDeep = false) {
+        if (isDeep) {
+            this.Map.forEach((node, idx) => {
+                let currentNode = node;
+                while (currentNode) {
+                    const nextNode = currentNode.nextInBucket;
+                    currentNode.nextInBucket = null;
+                    currentNode = nextNode;
+                }
+            });
+        }
+        this.Map.fill(null);
+        this.tail = null;
+        this.head = null;
+        this.#length = 0;
+    };
+
     *[Symbol.iterator]() {
         let node = this.head;
         while (node) {
             yield node;
             node = node.nextOrder;
         }
-    }
+    };
 }
