@@ -123,13 +123,60 @@ class HashMap<K extends Key, V> implements IHashMap<K, V> {
     // Get value by key
     get(key: K) {
         const idx = this.hash(key);
-        let value = this.Map[idx];
-        while (value) {
-            if (value.key === key)
-                return value.value;
-            value = value.nextInBucket
+        let node = this.Map[idx];
+        while (node) {
+            if (node.key === key)
+                return node.value;
+            node = node.nextInBucket
         }
         return null;
+    };
+
+    // Удаляет узел соблюдая связи в односвязном списке корзины и двусвязном списке порядка добавления
+    // prevNode - предыдущий список в односвязном списке корзины
+    #removeHelper(
+        prevNode: number | IHashMapNode<K, V>,
+        removeNode: IHashMapNode<K, V>,
+    ) {
+        // Если удаляемый узел - это голова односвязного списка корзины
+        if (typeof prevNode === "number") {
+            this.Map[prevNode] = removeNode.nextInBucket;
+        } else {
+            prevNode.nextInBucket = removeNode.nextInBucket;
+        }
+
+        // Сохраняем порядок двусвязного списка
+        if (this.tail === removeNode) this.tail = removeNode.prevOrder;
+        if (this.head === removeNode) this.head = removeNode.nextOrder;
+        if (removeNode.nextOrder && removeNode.prevOrder) {
+            removeNode.prevOrder.nextOrder = removeNode.nextOrder;
+        }
+        // Очищаем узел, чтобы избежать утечек памяти 
+        removeNode.prevOrder = null;
+        removeNode.nextOrder = null;
+        removeNode.nextInBucket = null;
+
+        this.#length--;
+        return true;
+    };
+
+    remove(key: K) {
+        const idx = this.hash(key);
+        let node = this.Map[idx];
+        if (!node) return false;
+        // Если удаляемый узел в начале списка корзины
+        if (node.key === key) {
+            return this.#removeHelper(idx, node);
+        } else {
+            // Пробегаем по связному списку в корзине, чтобы найти предыдущий узел удаляемого узла
+            while (node.nextInBucket) {
+                if (node.nextInBucket.key === key) {
+                    let removeNode = node.nextInBucket;
+                    return this.#removeHelper(node, removeNode);
+                }
+            }
+        }
+        return false;
     };
 
     length() {
