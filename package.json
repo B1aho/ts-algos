@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "main": "main.ts",
   "scripts": {
+    "hashMap": "npx ts-node data_structures/hashMap/test.ts ",
+    "linkedList": "npx ts-node data_structures/linkedList/test.ts ",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
