@@ -53,8 +53,24 @@ class HashMap<K extends Key, V> implements IHashMap<K, V> {
         return fnv1aHash(key) % this.capacity;
     };
 
-    #rehash() {
+    #rehash(newMap: HashNodeNullable<K, V>[]) {
+        // Проходим по всем узлам старой таблицы
+        for (let node of this.Map) {
+            while (node) {
+                // Вычисляем новый индекс с помощью хеш-функции
+                const newIdx = this.hash(node.key);
+                // Сохраняем ссылку на следующий узел в старой цепочке, чтобы не потерять её
+                const nextNode = node.nextInBucket;
 
+                // Вствляем узел в голову списка корзины в новой таблице
+                node.nextInBucket = newMap[newIdx];
+                newMap[newIdx] = node;
+
+                node = nextNode;
+            }
+        }
+        this.Map.fill(null);
+        this.Map = newMap;
     }
 
     // Set new key: value entry into the table
@@ -64,7 +80,7 @@ class HashMap<K extends Key, V> implements IHashMap<K, V> {
             this.capacity *= 2;
             this.limit = Math.floor(this.capacity * this.loadFactor);
             const newMap = new Array(this.capacity).fill(null);
-            this.#rehash();
+            this.#rehash(newMap);
         }
 
         const idx = this.hash(key);
@@ -114,5 +130,13 @@ class HashMap<K extends Key, V> implements IHashMap<K, V> {
             value = value.nextInBucket
         }
         return null;
+    };
+
+    *[Symbol.iterator]() {
+        let node = this.head;
+        while (node) {
+            yield node;
+            node = node.nextOrder;
+        }
     }
 }
