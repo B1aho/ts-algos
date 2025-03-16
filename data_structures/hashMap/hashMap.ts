@@ -20,3 +20,7 @@ class HashMapNode<K extends Key, V> implements IHashMapNode<K, V> {
         this.nextInBucket = nextInBucket;
     }
 }
+
+class HashMap<K extends Key, V> implements IHashMap<Key, V> {
+
+}

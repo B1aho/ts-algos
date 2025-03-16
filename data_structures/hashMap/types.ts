@@ -12,4 +12,11 @@ export interface IHashMap<K extends Key, V> {
     hashMap: IHashMapNode<K, V>[];
     set: (key: K, value: V) => boolean;
     get: (key: K) => V;
+    has: (key: K) => boolean;
+    remove: (key: K) => boolean;
+    length: () => number;
+    clear: () => void;
+    keys: () => K[];
+    values: () => V[];
+    entries: () => [K, V][];
 }
