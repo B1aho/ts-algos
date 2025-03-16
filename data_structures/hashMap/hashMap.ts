@@ -4,33 +4,41 @@
 // Двусвязный список благодаря которому при переборе значение в hashMap (встрою итератор), они будут
 // перебираться в порядке добавления, перебираться будет этот двусвязный список. А ключами может быть все, что
 // угодно.
-import { IHashMapNode, IHashMap, Key } from "./types";
+import { IHashMapNode, IHashMap, Key, HashNodeNullable } from "./types";
 import { fnv1aHash } from "./hashCode";
 
+// Добавить комментарий, что ссылки prevOrder nextOrder логически образуют двусвязный список - для соблюдения порядка
+// А nextInBucket образует односвязный список конкретной корзины
 class HashMapNode<K extends Key, V> implements IHashMapNode<K, V> {
-    prevOrder: IHashMapNode<K, V> | null;
-    nextOrder: IHashMapNode<K, V> | null;
-    nextInBucket: IHashMapNode<K, V> | null;
+    prevOrder: HashNodeNullable<K, V>;
+    nextOrder: HashNodeNullable<K, V>;
+    nextInBucket: HashNodeNullable<K, V>;
     key: K;
     value: V;
-    constructor(key: K, value: V, prevOrder = null, nextOrder = null, nextInBucket = null) {
+    constructor(
+        key: K,
+        value: V,
+        prevOrder: HashNodeNullable<K, V> = null,
+        nextOrder: HashNodeNullable<K, V> = null,
+        nextInBucket: HashNodeNullable<K, V> = null
+    ) {
         this.key = key;
         this.value = value;
         this.prevOrder = prevOrder;
         this.nextOrder = nextOrder;
         this.nextInBucket = nextInBucket;
-    }
+    };
 }
 
 class HashMap<K extends Key, V> implements IHashMap<K, V> {
     capacity: number;
     loadFactor: number;
     limit: number = 0;
-    Map: IHashMapNode<K, V>[];
+    Map: HashNodeNullable<K, V>[];
     #length = 0;
     // Double linked list (implement order)
-    head = 0;
-    tail = 0;
+    head: HashNodeNullable<K, V> = null;
+    tail: HashNodeNullable<K, V> = null;
     constructor(capacity = 32, loadFactor = 0.8) {
         // Calculate the table's limit – the maximum number of elements effective to keep, presumably without collisions
         this.capacity = capacity;
@@ -45,14 +53,66 @@ class HashMap<K extends Key, V> implements IHashMap<K, V> {
         return fnv1aHash(key) % this.capacity;
     };
 
+    #rehash() {
+
+    }
+
     // Set new key: value entry into the table
     set(key: K, value: V) {
         // If the new element overflows the table, we expand it and rehash
         if (this.#length + 1 >= this.limit) {
             this.capacity *= 2;
+            this.limit = Math.floor(this.capacity * this.loadFactor);
             const newMap = new Array(this.capacity).fill(null);
-            // rehash ...
+            this.#rehash();
         }
-        const idx = 
+
+        const idx = this.hash(key);
+        if (idx < 0 || idx >= this.#length) {
+            throw new Error("Wrong hash: Trying to access index out of bounds");
+        }
+
+        let target: HashNodeNullable<K, V> = this.Map[idx];
+        // Если нет коллизии
+        if (!target) {
+            // Добавляем новый узел
+            const newNode = new HashMapNode(key, value, this.tail)
+            this.Map[idx] = newNode;
+            // обновляем двусвязный список
+            if (!this.head) this.head = newNode;
+            if (this.tail) this.tail.nextOrder = newNode;
+            this.tail = newNode;
+
+            this.#length++;
+        } else {
+            // Поиск в связном списке корзины
+            while (target.key !== key && target.nextInBucket) {
+                target = target.nextInBucket;
+            }
+            if (target.key === key) target.value = value;
+            else {
+                const newNode = new HashMapNode(key, value, this.tail);
+                target.nextInBucket = newNode;
+
+                // Обновляем двусвязный список
+                if (this.tail) this.tail.nextOrder = newNode;
+                this.tail = newNode;
+
+                this.#length++;
+            }
+        }
+        return this.Map;
     };
+
+    // Get value by key
+    get(key: K) {
+        const idx = this.hash(key);
+        let value = this.Map[idx];
+        while (value) {
+            if (value.key === key)
+                return value.value;
+            value = value.nextInBucket
+        }
+        return null;
+    }
 }

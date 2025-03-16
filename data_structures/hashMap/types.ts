@@ -8,13 +8,15 @@ export interface IHashMapNode<K extends Key, V> {
     nextInBucket: IHashMapNode<K, V> | null;
 }
 
+export type HashNodeNullable<K extends Key, V> = IHashMapNode<K, V> | null;
+
 export interface IHashMap<K extends Key, V> {
     capacity: number;
     loadFactor: number;
-    Map: IHashMapNode<K, V>[];
+    Map: HashNodeNullable<K, V>[];
     hash: (key: K) => number;
-    set: (key: K, value: V) => boolean;
-    get: (key: K) => V;
+    set: (key: K, value: V) => HashNodeNullable<K, V>[];
+    get: (key: K) => V | null;
     has: (key: K) => boolean;
     remove: (key: K) => boolean;
     length: () => number;
