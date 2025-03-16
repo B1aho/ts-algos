@@ -5,6 +5,7 @@
 // перебираться в порядке добавления, перебираться будет этот двусвязный список. А ключами может быть все, что
 // угодно.
 import { IHashMapNode, IHashMap, Key } from "./types";
+import { fnv1aHash } from "./hashCode";
 
 class HashMapNode<K extends Key, V> implements IHashMapNode<K, V> {
     prevOrder: IHashMapNode<K, V> | null;
@@ -21,6 +22,37 @@ class HashMapNode<K extends Key, V> implements IHashMapNode<K, V> {
     }
 }
 
-class HashMap<K extends Key, V> implements IHashMap<Key, V> {
+class HashMap<K extends Key, V> implements IHashMap<K, V> {
+    capacity: number;
+    loadFactor: number;
+    limit: number = 0;
+    Map: IHashMapNode<K, V>[];
+    #length = 0;
+    // Double linked list (implement order)
+    head = 0;
+    tail = 0;
+    constructor(capacity = 32, loadFactor = 0.8) {
+        // Calculate the table's limit – the maximum number of elements effective to keep, presumably without collisions
+        this.capacity = capacity;
+        this.loadFactor = loadFactor;
+        this.limit = Math.floor(this.capacity * this.loadFactor);
+        // Init Map
+        this.Map = new Array(this.capacity).fill(null);
+    };
 
+    // Hash-function
+    hash(key: K) {
+        return fnv1aHash(key) % this.capacity;
+    };
+
+    // Set new key: value entry into the table
+    set(key: K, value: V) {
+        // If the new element overflows the table, we expand it and rehash
+        if (this.#length + 1 >= this.limit) {
+            this.capacity *= 2;
+            const newMap = new Array(this.capacity).fill(null);
+            // rehash ...
+        }
+        const idx = 
+    };
 }

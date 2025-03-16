@@ -9,7 +9,10 @@ export interface IHashMapNode<K extends Key, V> {
 }
 
 export interface IHashMap<K extends Key, V> {
-    hashMap: IHashMapNode<K, V>[];
+    capacity: number;
+    loadFactor: number;
+    Map: IHashMapNode<K, V>[];
+    hash: (key: K) => number;
     set: (key: K, value: V) => boolean;
     get: (key: K) => V;
     has: (key: K) => boolean;
