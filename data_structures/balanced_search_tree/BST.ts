@@ -1,4 +1,4 @@
-import { INode, ITree, ValueType } from "./types";
+import { INode, ITree, queueItem, ValueType } from "./types";
 
 class Node<T extends ValueType> implements INode<T> {
     value: T;
@@ -23,6 +23,7 @@ class BSTtree<T extends ValueType> implements ITree<T> {
         buildOption: 'iterative' | 'recursive' = 'recursive'
     ) {
         if (input === null) return this;
+        // #removeDuplicats(input) -
         if (buildOption === 'iterative') {
             this.#root = this.buildBSTiterative(input);
         } else {
@@ -30,6 +31,7 @@ class BSTtree<T extends ValueType> implements ITree<T> {
         }
     };
 
+    // Рекрсивное построение BST, краткое и элегантное 
     buildBSTrecursive(
         input: T[],
         start: number = 0,
@@ -47,18 +49,64 @@ class BSTtree<T extends ValueType> implements ITree<T> {
         return node;
     };
 
-    // Using a queue-based approach, similar to BFS
-    // The nuance here is that this is a naive queue implementation, and the shift method is inefficient
-    // The proper Queue implementation is in a separate project folder
+    // Using a queue-based approach, similar to BFS.
+    // The nuance here is that this is a naive queue implementation, and the shift method is inefficient.
+    // The proper Queue implementation is in a separate project folder.
     buildBSTiterative(input: T[]): Node<T> | null {
+        if (input.length === 0) return null;
+
         let middle = Math.floor((input.length) / 2);
         const root: INode<T> | null = new Node<T>(middle as T);
-        const queue: { node: Node<T>, start: number, end: number }[] = [];
-
+        const queue: queueItem<T>[] = [];
+        queue.push({ node: root, start: 0, end: input.length - 1 });
+        // Пока очередь не пуста: 
+        // Достаём узел с границами из очереди.
+        // Определяем середину его левого и правого подмассивов.
+        // Эти значения являются значениями левого и правого дочерних узлов
+        // Прикрепляем их к корню и добавляем в очередь, со своими границами
         while (queue.length) {
+            const { node, start, end } = queue.shift() as queueItem<T>;
+            const middle = Math.floor((start + end) / 2);
 
+            let leftMiddle = Math.floor((start + middle - 1) / 2);
+            if (start <= middle - 1) {
+                const leftNode = new Node<T>(leftMiddle as T);
+                node.leftChild = leftNode;
+                queue.push({ node: leftNode, start, end: middle - 1 })
+            }
+
+            let rightMiddle = Math.floor((middle + 1 + end) / 2);
+            if (middle + 1 <= end) {
+                const rightNode = new Node<T>(rightMiddle as T);
+                node.rightChild = rightNode;
+                queue.push({ node: rightNode, start: middle + 1, end })
+            }
         }
 
-        return root;
+        return this.#root;
+    };
+
+    insert(value: T) {
+        if (!this.#root) {
+            this.#root = new Node<T>(value);
+            return true;
+        }
+        let node = this.#root;
+
+        while (true) {
+            if (value > node.value) {
+                if (!node.rightChild) {
+                    node.rightChild = new Node<T>(value);
+                    return true;
+                }
+                node = node.rightChild;
+            } else if (value < node.value) {
+                if (!node.leftChild) {
+                    node.leftChild = new Node<T>(value);
+                    return true;
+                }
+                node = node.leftChild;
+            } else return false
+        }
     };
 }

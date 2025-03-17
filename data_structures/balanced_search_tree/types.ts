@@ -22,3 +22,5 @@ export interface ITree<T extends ValueType> {
     isBalanced: () => boolean;
     rebalance: () => void;
 }
+
+export type queueItem<T extends ValueType> = { node: INode<T>, start: number, end: number };
