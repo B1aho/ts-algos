@@ -1,4 +1,4 @@
-type ValueType = number | string;
+export type ValueType = number | string;
 
 export interface INode<T extends ValueType> {
     value: T;
@@ -7,8 +7,8 @@ export interface INode<T extends ValueType> {
 }
 
 export interface ITree<T extends ValueType> {
-    root: INode<T> | null;
-    buildBST: (input: T[]) => INode<T> | null;
+    buildBSTrecursive: (input: T[]) => INode<T> | null;
+    buildBSTiterative: (input: T[]) => INode<T> | null;
     printTree: () => void;
     insert: (value: T) => boolean;
     delete: (value: T) => boolean;
