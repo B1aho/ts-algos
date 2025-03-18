@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "main": "main.ts",
   "scripts": {
-    "hashMap": "npx ts-node data_structures/hashMap/test.ts ",
-    "linkedList": "npx ts-node data_structures/linkedList/test.ts ",
+    "hashMap": "npx ts-node data_structures/hash_map/test.ts ",
+    "linkedList": "npx ts-node data_structures/linked_list/test.ts ",
+    "BST": "npx ts-node data_structures/balanced_search_tree/test.ts ",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

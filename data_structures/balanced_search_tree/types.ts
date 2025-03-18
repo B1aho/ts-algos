@@ -6,6 +6,8 @@ export interface INode<T extends ValueType> {
     rightChild: INode<T> | null;
 }
 
+export type treeCallback<T> = (value: T) => void;
+
 export interface ITree<T extends ValueType> {
     buildBSTrecursive: (input: T[]) => INode<T> | null;
     buildBSTiterative: (input: T[]) => INode<T> | null;
@@ -13,10 +15,10 @@ export interface ITree<T extends ValueType> {
     insert: (value: T) => boolean;
     delete: (value: T) => boolean;
     find: (value: T) => INode<T> | null;
-    levelOrder: (fn: (value: T) => void) => void;
-    inOrder: (fn: (value: T) => void) => void;
-    preOrder: (fn: (value: T) => void) => void;
-    postOrder: (fn: (value: T) => void) => void;
+    levelOrder: (fn: treeCallback<T>) => void;
+    inOrder: (fn: treeCallback<T>) => void;
+    preOrder: (fn: treeCallback<T>) => void;
+    postOrder: (fn: treeCallback<T>) => void;
     height: (node: INode<T>) => number;
     depth: (node: INode<T>) => number;
     isBalanced: () => boolean;

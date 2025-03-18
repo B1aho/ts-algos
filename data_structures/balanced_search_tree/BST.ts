@@ -1,4 +1,4 @@
-import { INode, ITree, queueItem, ValueType } from "./types";
+import { INode, ITree, queueItem, treeCallback, ValueType } from "./types";
 
 class Node<T extends ValueType> implements INode<T> {
     value: T;
@@ -15,7 +15,7 @@ class Node<T extends ValueType> implements INode<T> {
     };
 }
 
-class BSTtree<T extends ValueType> implements ITree<T> {
+export class BSTtree<T extends ValueType> implements ITree<T> {
     #root: INode<T> | null = null;
 
     constructor(
@@ -109,4 +109,65 @@ class BSTtree<T extends ValueType> implements ITree<T> {
             } else return false
         }
     };
-}
+
+    // Draw pretty tree: First (above) - right subtree, then (down) - left subtree
+    #prettyPrint(node: INode<T> | null, prefix = "", isLeft = true) {
+        if (node === null) {
+            return;
+        }
+
+        if (node.rightChild !== null) {
+            this.#prettyPrint(node.rightChild, `${prefix}${isLeft ? "│   " : "    "}`, false);
+        }
+
+        console.log(`${prefix}${isLeft ? "└── " : "┌── "}${node.value}`);
+
+        if (node.leftChild !== null) {
+            this.#prettyPrint(node.leftChild, `${prefix}${isLeft ? "    " : "│   "}`, true);
+        }
+    };
+
+    printTree() {
+        this.#prettyPrint(this.#root);
+    };
+
+    delete(value: T) {
+        return true;
+    };
+
+    find(value: T) {
+        return null;
+    };
+
+    depth(node: INode<T>) {
+        return 0;
+    };
+
+    height(node: INode<T>) {
+        return 0;
+    };
+
+    inOrder(fn: treeCallback<T>) {
+
+    };
+
+    preOrder(fn: treeCallback<T>) {
+
+    };
+
+    postOrder(fn: treeCallback<T>) {
+
+    };
+
+    levelOrder(fn: treeCallback<T>) {
+
+    };
+
+    isBalanced() {
+        return true;
+    };
+
+    rebalance() {
+
+    };
+};
