@@ -86,6 +86,28 @@ export class BSTtree<T extends ValueType> implements ITree<T> {
         return this.#root;
     };
 
+    // Draw pretty tree: First (above) - right subtree, then (down) - left subtree
+    #prettyPrint(node: INode<T> | null, prefix = "", isLeft = true) {
+        if (node === null) {
+            return;
+        }
+
+        if (node.rightChild !== null) {
+            this.#prettyPrint(node.rightChild, `${prefix}${isLeft ? "│   " : "    "}`, false);
+        }
+
+        console.log(`${prefix}${isLeft ? "└── " : "┌── "}${node.value}`);
+
+        if (node.leftChild !== null) {
+            this.#prettyPrint(node.leftChild, `${prefix}${isLeft ? "    " : "│   "}`, true);
+        }
+    };
+
+    printTree() {
+        this.#prettyPrint(this.#root);
+    };
+
+    // Iterative insert
     insert(value: T) {
         if (!this.#root) {
             this.#root = new Node<T>(value);
@@ -110,29 +132,60 @@ export class BSTtree<T extends ValueType> implements ITree<T> {
         }
     };
 
-    // Draw pretty tree: First (above) - right subtree, then (down) - left subtree
-    #prettyPrint(node: INode<T> | null, prefix = "", isLeft = true) {
+    #findMin(root: INode<T>): T {
+        let node = root;
+        while (node && node.leftChild) {
+            node = node.leftChild;
+        }
+        return node.value;
+    }
+
+    // Recursive delete
+    #deleteHelper(node: INode<T> | null, value: T): INode<T> | null {
+        // No such element
         if (node === null) {
-            return;
+            return null;
         }
 
-        if (node.rightChild !== null) {
-            this.#prettyPrint(node.rightChild, `${prefix}${isLeft ? "│   " : "    "}`, false);
+        if (value < node.value) {
+            node.leftChild = this.#deleteHelper(node.leftChild, value);
+        } else if (value > node.value) {
+            node.rightChild = this.#deleteHelper(node.rightChild, value);
+        } else {
+            /**
+             * No children → simply delete the node.
+             * One child → replace the node with its child.
+             * Two children → find the minimum node in the right subtree, replace the node with it, 
+             * and delete the minimum node (find next in-order successor)
+             */
+            if (!node.leftChild && !node.rightChild) {
+                return null;
+            } else if (!node.rightChild) {
+                const retNode = node.leftChild;
+                // This nullification is not mandatory in JavaScript, unless you don't trust the GC
+                node.leftChild = null;
+                return retNode;
+            } else if (!node.leftChild) {
+                const retNode = node.rightChild;
+                node.rightChild = null;
+                return retNode;
+            } else {
+                // Копируем значение наименьшего узла из наибольших узлов чем удаляемых узел в удаляемый узел
+                let minVal = this.#findMin(node.rightChild);
+                node.value = minVal;
+                // Если у минимального узла были правые дети
+                node.rightChild = this.#deleteHelper(node.rightChild, minVal)
+            }
         }
-
-        console.log(`${prefix}${isLeft ? "└── " : "┌── "}${node.value}`);
-
-        if (node.leftChild !== null) {
-            this.#prettyPrint(node.leftChild, `${prefix}${isLeft ? "    " : "│   "}`, true);
-        }
+        // Return child node that was updated or not updated
+        return node;
     };
 
-    printTree() {
-        this.#prettyPrint(this.#root);
-    };
-
-    delete(value: T) {
-        return true;
+    delete(value: T): boolean {
+        if (!this.#root) {
+            return false;
+        }
+        return this.#deleteHelper(this.#root, value) ? true : false;
     };
 
     find(value: T) {
