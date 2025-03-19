@@ -47,7 +47,6 @@ export class BSTtree<T extends ValueType> implements ITree<T> {
         return arr.slice(0, l + 1);
     }
 
-    // Рекрсивное построение BST, краткое и элегантное 
     buildBSTrecursive(
         input: T[],
         start: number = 0,
@@ -75,11 +74,12 @@ export class BSTtree<T extends ValueType> implements ITree<T> {
         const root: INode<T> | null = new Node<T>(input[middle] as T);
         const queue: queueItem<T>[] = [];
         queue.push({ node: root, start: 0, end: input.length - 1 });
-        // Пока очередь не пуста: 
-        // Достаём узел с границами из очереди.
-        // Определяем середину его левого и правого подмассивов.
-        // Эти значения являются значениями левого и правого дочерних узлов
-        // Прикрепляем их к корню и добавляем в очередь, со своими границами
+
+        // While the queue is not empty:
+        // Dequeue a node with bounds from the queue
+        // Find the middle of its left and right subarrays
+        // These values become the left and right child nodes
+        // Attach them to the root and push them into the queue with their respective bounds
         while (queue.length) {
             const { node, start, end } = queue.shift() as queueItem<T>;
             const middle = Math.floor((start + end) / 2);
@@ -148,6 +148,7 @@ export class BSTtree<T extends ValueType> implements ITree<T> {
         }
     };
 
+    // Find min value in subtree
     #findMin(root: INode<T>): T {
         let node = root;
         while (node && node.leftChild) {
@@ -186,10 +187,9 @@ export class BSTtree<T extends ValueType> implements ITree<T> {
                 node.rightChild = null;
                 return retNode;
             } else {
-                // Копируем значение наименьшего узла из наибольших узлов чем удаляемых узел в удаляемый узел
                 let minVal = this.#findMin(node.rightChild);
                 node.value = minVal;
-                // Если у минимального узла были правые дети
+                // Solve case when minNode in right subtree has own children 
                 node.rightChild = this.#deleteHelper(node.rightChild, minVal)
             }
         }
@@ -217,6 +217,7 @@ export class BSTtree<T extends ValueType> implements ITree<T> {
         }
     };
 
+    // Find and return node by its value
     find(value: T): INode<T> | null {
         return this.#findHelper(this.#root, value);
     };
