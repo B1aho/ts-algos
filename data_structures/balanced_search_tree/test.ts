@@ -1,5 +1,14 @@
 import { BSTtree } from "./BST";
 
-const arr = [1, 2, 4, 5, 6, 7, 8, 9, 10, 12, 14, 15, 16, 17, 19, 21, 24, 25, 26];
-const tree = new BSTtree(arr);
+const tree = new BSTtree(randomSortedArr(50));
 tree.printTree();
+
+
+function randomSortedArr(length: number): number[] {
+    return Array.from({ length })
+        .map((val, idx) => {
+            return Math.floor(Math.random() * length);
+        })
+        .sort((a, b) => a - b);
+
+}

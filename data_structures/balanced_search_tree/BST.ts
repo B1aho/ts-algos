@@ -23,13 +23,29 @@ export class BSTtree<T extends ValueType> implements ITree<T> {
         buildOption: 'iterative' | 'recursive' = 'recursive'
     ) {
         if (input === null) return this;
-        // #removeDuplicats(input) -
+
+        input = this.#removeDuplicats(input);
+
         if (buildOption === 'iterative') {
             this.#root = this.buildBSTiterative(input);
         } else {
             this.#root = this.buildBSTrecursive(input);
         }
     };
+
+    // Two pointers method that reduce duplicats
+    #removeDuplicats(arr: T[]) {
+        let l = 0, r = 0;
+
+        while (r < arr.length) {
+            if (arr[l] !== arr[r]) {
+                l++;
+                arr[l] = arr[r]
+            }
+            r++;
+        }
+        return arr.slice(0, l + 1);
+    }
 
     // Рекрсивное построение BST, краткое и элегантное 
     buildBSTrecursive(
