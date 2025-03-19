@@ -261,20 +261,39 @@ export class BSTtree<T extends ValueType> implements ITree<T> {
     };
 
     // Node Depth - number of edges in the path from a given node to the tree’s root node
-    depth(node: INode<T>) {
-        return 0;
+    // In fact it is just level-order (BFS), from root to node with tracking level
+    depth(node: INode<T>): number {
+        if (!this.#root) return -1;
+
+        const queue: { currNode: INode<T>, level: number }[] = [];
+        queue.push({ currNode: this.#root, level: 0 });
+
+        while (queue.length) {
+            const { currNode, level } = queue.shift() as { currNode: INode<T>, level: 0 };
+            if (node === currNode) return level;
+            if (currNode.leftChild) queue.push({ currNode: currNode.leftChild, level: level + 1 });
+            if (currNode.rightChild) queue.push({ currNode: currNode.rightChild, level: level + 1 });
+        }
+        return -1;
     };
 
     // Node height - the longest path from a given node to a leaf node.
-    height(node: INode<T>) {
-        return 0;
+    // Recursively find hight of left node and right node and return max + 1;
+    height(node: INode<T>): number {
+        if (!node) return 0;
+
+        let leftNodeHeight = node.leftChild ? this.height(node.leftChild) : 0;
+        let rightNodeHeight = node.rightChild ? this.height(node.rightChild) : 0;
+
+
+        return Math.max(rightNodeHeight, leftNodeHeight) + 1;
     };
 
-    isBalanced() {
+    isBalanced(): boolean {
         return true;
     };
 
-    rebalance() {
+    rebalance(): void {
 
     };
 };
