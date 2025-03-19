@@ -72,7 +72,7 @@ export class BSTtree<T extends ValueType> implements ITree<T> {
         if (input.length === 0) return null;
 
         let middle = Math.floor((input.length) / 2);
-        const root: INode<T> | null = new Node<T>(middle as T);
+        const root: INode<T> | null = new Node<T>(input[middle] as T);
         const queue: queueItem<T>[] = [];
         queue.push({ node: root, start: 0, end: input.length - 1 });
         // Пока очередь не пуста: 
@@ -86,20 +86,20 @@ export class BSTtree<T extends ValueType> implements ITree<T> {
 
             let leftMiddle = Math.floor((start + middle - 1) / 2);
             if (start <= middle - 1) {
-                const leftNode = new Node<T>(leftMiddle as T);
+                const leftNode = new Node<T>(input[leftMiddle] as T);
                 node.leftChild = leftNode;
                 queue.push({ node: leftNode, start, end: middle - 1 })
             }
 
             let rightMiddle = Math.floor((middle + 1 + end) / 2);
             if (middle + 1 <= end) {
-                const rightNode = new Node<T>(rightMiddle as T);
+                const rightNode = new Node<T>(input[rightMiddle] as T);
                 node.rightChild = rightNode;
                 queue.push({ node: rightNode, start: middle + 1, end })
             }
         }
 
-        return this.#root;
+        return root;
     };
 
     // Draw pretty tree: First (above) - right subtree, then (down) - left subtree
@@ -328,8 +328,9 @@ export class BSTtree<T extends ValueType> implements ITree<T> {
     };
 
     rebalance(): void {
-        const sortedArr: T[] = [];
+        let sortedArr: T[] = [];
         this.inOrder((val) => sortedArr.push(val));
-        this.buildBSTiterative(sortedArr);
+        sortedArr = this.#removeDuplicats(sortedArr);
+        this.#root = this.buildBSTiterative(sortedArr);
     };
 };
