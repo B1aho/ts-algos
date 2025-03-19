@@ -274,6 +274,7 @@ export class BSTtree<T extends ValueType> implements ITree<T> {
             if (currNode.leftChild) queue.push({ currNode: currNode.leftChild, level: level + 1 });
             if (currNode.rightChild) queue.push({ currNode: currNode.rightChild, level: level + 1 });
         }
+
         return -1;
     };
 
@@ -285,15 +286,34 @@ export class BSTtree<T extends ValueType> implements ITree<T> {
         let leftNodeHeight = node.leftChild ? this.height(node.leftChild) : 0;
         let rightNodeHeight = node.rightChild ? this.height(node.rightChild) : 0;
 
-
         return Math.max(rightNodeHeight, leftNodeHeight) + 1;
     };
 
+    // 
+    #countHeightAndBalance(node: INode<T> | null): { height: number, balance: number } {
+        if (!node) return { height: 0, balance: 0 };
+
+        let left = this.#countHeightAndBalance(node.leftChild);
+        let right = this.#countHeightAndBalance(node.rightChild);
+
+        let balance = Math.abs(left.height - right.height);
+        let height = 1 + Math.max(left.height, right.height);
+
+        return { height, balance };
+    }
+
+    // A balanced tree is one where the difference between heights of the left subtree and the right subtree of 
+    // every node is not more than 1
     isBalanced(): boolean {
-        return true;
+        if (!this.#root) return true;
+
+        const { balance } = this.#countHeightAndBalance(this.#root);
+        return balance <= 1;
     };
 
     rebalance(): void {
-
+        const sortedArr: T[] = [];
+        this.inOrder((val) => sortedArr.push(val));
+        this.buildBSTiterative(sortedArr);
     };
 };
