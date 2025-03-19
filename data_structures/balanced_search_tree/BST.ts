@@ -188,32 +188,86 @@ export class BSTtree<T extends ValueType> implements ITree<T> {
         return this.#deleteHelper(this.#root, value) ? true : false;
     };
 
-    find(value: T) {
-        return null;
+    #findHelper(node: INode<T> | null, value: T): INode<T> | null {
+        if (node === null)
+            return null;
+
+        if (value < node.value) {
+            return this.#findHelper(node.leftChild, value);
+        } else if (value > node.value) {
+            return this.#findHelper(node.leftChild, value);
+        } else {
+            return node;
+        }
     };
 
+    find(value: T): INode<T> | null {
+        return this.#findHelper(this.#root, value);
+    };
+
+    // Breadth first traverse
+    // Can be implementes both: recursive (emulate queue, pass node list of curr level) and iterative (queue)
+    levelOrder(fn: treeCallback<T>) {
+        if (!this.#root) return;
+
+        const queue: INode<T>[] = [];
+        queue.push(this.#root);
+        while (queue.length) {
+            const currNode = queue.shift() as INode<T>;
+            fn(currNode.value);
+            if (currNode.leftChild) queue.push(currNode.leftChild);
+            if (currNode.rightChild) queue.push(currNode.rightChild);
+        }
+        return;
+    };
+
+    #inOrderHelper(node: INode<T>, fn: treeCallback<T>) {
+        if (node.leftChild) this.#inOrderHelper(node.leftChild, fn);
+        fn(node.value);
+        if (node.rightChild) this.#inOrderHelper(node.rightChild, fn);
+    }
+
+    // Depth first travers: in-order
+    inOrder(fn: treeCallback<T>) {
+        if (!this.#root) return;
+
+        this.#inOrderHelper(this.#root, fn);
+    };
+
+    #preOrderHelper(node: INode<T>, fn: treeCallback<T>) {
+        fn(node.value);
+        if (node.leftChild) this.#preOrderHelper(node.leftChild, fn);
+        if (node.rightChild) this.#preOrderHelper(node.rightChild, fn);
+    }
+
+    // Depth first travers: pre-order
+    preOrder(fn: treeCallback<T>) {
+        if (!this.#root) return;
+
+        this.#preOrderHelper(this.#root, fn);
+    };
+
+    #postOrderHelper(node: INode<T>, fn: treeCallback<T>) {
+        if (node.leftChild) this.#postOrderHelper(node.leftChild, fn);
+        if (node.rightChild) this.#postOrderHelper(node.rightChild, fn);
+        fn(node.value);
+    }
+
+    // Depth first travers: post-order
+    postOrder(fn: treeCallback<T>) {
+        if (!this.#root) return;
+
+        this.#postOrderHelper(this.#root, fn);
+    };
+
+    // Node Depth - number of edges in the path from a given node to the tree’s root node
     depth(node: INode<T>) {
         return 0;
     };
 
+    // Node height - the longest path from a given node to a leaf node.
     height(node: INode<T>) {
         return 0;
-    };
-
-    inOrder(fn: treeCallback<T>) {
-
-    };
-
-    preOrder(fn: treeCallback<T>) {
-
-    };
-
-    postOrder(fn: treeCallback<T>) {
-
-    };
-
-    levelOrder(fn: treeCallback<T>) {
-
     };
 
     isBalanced() {
